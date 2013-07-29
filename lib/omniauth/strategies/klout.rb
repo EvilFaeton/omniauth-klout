@@ -2,16 +2,12 @@ require 'omniauth-oauth2'
 
 module OmniAuth
   module Strategies
-    class Klout
-      include  OmniAuth::Strategy
-      SITE = 'https://api.klout.com'
-      AUTHORIZE_URL = 'https://api.klout.com/v2/oauth/'
-
-      def initialize(app, api_key, api_secret)
-        @api_key = api_key
-        @api_secret = api_secret
-        super(app)
-      end
+    class Klout < OmniAuth::Strategies::OAuth2
+      option :client_options, {
+        :site => 'https://api.klout.com',
+        :authorize_url => 'https://api.klout.com/v2/oauth/',
+        :token_url => 'https://api.klout.com/v2/oauth/token.json'
+      }
 
       def request_phase
         redirect request_url
@@ -25,10 +21,14 @@ module OmniAuth
       end
 
       private
+
       def request_url
-        "#{AUTHORIZE_URL}?apiKey=#{@api_key}&redirect=#{callback_url}"
+        "#{options["client_options"]["authorize_url"]}?apiKey=#{options["client_id"]}&redirect=#{callback_url}"
       end
 
     end
   end
 end
+
+
+OmniAuth.config.add_camelization 'klout', 'Klout'
